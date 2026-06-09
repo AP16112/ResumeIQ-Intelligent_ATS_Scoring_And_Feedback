@@ -8,7 +8,8 @@ from pathlib import Path
 # Here we need this os library to access the environment variables from the .enf file. And this Path library from pathlib is used to get the path of the .env file.
 
 # Now if this .env file is missing or if we are not able to load the environment variables from the .env file, then we will get an error. So to avoid that error, we will check if the .env file is present in the project or not. If it is present, then we will load the environment variables from the .env file using 'dotenv' library. So we will use try and except block to handle that error.
-
+# Load .env from the project root (two levels up from this file) explicitly —
+# load_dotenv() with no args relies on caller-frame inspection that can fail silently under uvicorn reload, leaving env vars unset.
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -78,3 +79,21 @@ JD_SEMANTIC_WEIGHT=0.4
 
 # Here this Tries to read the environment variable named GROQ_API_KEY. If it exists, the value (your actual API key string) is returned. If it doesn’t exist, it falls back to an empty string ('').
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+
+# Reads the Supabase project URL from your .env file or system environment. Example: https://xyzcompany.supabase.co. This is the base endpoint for all API calls.
+SUPABASE_URL = os.getenv('SUPABASE_URL', '')
+
+# A high‑privilege key that bypasses Row Level Security (RLS). Used only in backend code (never exposed to frontend).
+# Allows full database writes, admin tasks, batch operations. Dangerous if leaked — it’s like the “master password.”
+SUPABASE_KEY = os.getenv('SUPABASE_KEY', '')    # service_role - DB writes (bypasses RLS)
+
+# anon means anonymous key
+# A public key safe to use in frontend apps (React, Streamlit, etc.). Works only within the limits of your RLS policies.
+# Example: a student logging in can only see their own records.
+# This is what your dashboard uses for user‑facing queries.
+SUPABASE_ANON_KEY  = os.getenv('SUPABASE_ANON_KEY', '')     # public anon — frontend auth calls
+
+# Secret used to verify JWT access tokens issued by Supabase Auth. Ensures that tokens presented by users are valid and signed correctly. Used in backend authentication flows.
+SUPABASE_JWT_SECRET= os.getenv('SUPABASE_JWT_SECRET', '')   # used by backend to verify access tokens
+
+
