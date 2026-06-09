@@ -1,0 +1,178 @@
+# ResumeIQ - "Intelligent ATS scoring & feedback" — combined backend + frontend dependencies.
+#
+# Install with:
+#     pip install -r requirements.txt
+#
+# After installing, download the spaCy model the backend uses at startup:
+#     python -m spacy download en_core_web_md
+
+
+# ── Backend: web framework ──
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.6
+python-multipart>=0.0.9      # required by FastAPI for File/Form uploads
+python-dotenv>=1.0   #  It loads environment variables from a .env file into our Python application.
+
+
+
+# ── Backend: NLP / ML ──
+spacy>=3.7,<4.0
+sentence-transformers>=2.5
+numpy>=1.26
+rapidfuzz>=3.6
+# A fast string matching and fuzzy search library for Python. Similar to fuzzywuzzy, but optimized for speed and lower memory usage.
+# Useful when you need to compare text and measure similarity (e.g., resume text vs. job description).
+
+torch==2.7.1+cpu
+# here this pins PyTorch to version 2.7.1, CPU‑only build (no GPU/CUDA support).
+torchvision==0.22.1+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+# Here this Tells pip to look at the official PyTorch wheel repository for CPU builds. Without this, pip may not find the +cpu variants.
+
+# here we need these torch and torchvision libraries because SentenceTransformers depends on PyTorch.
+# Without torch, you can’t load or run transformer models like "all-MiniLM-L6-v2".
+# TorchVision isn’t strictly required for NLP, but it’s often bundled with PyTorch installs to avoid dependency mismatches.
+
+
+
+# ── Backend: file parsing ──
+pdfplumber>=0.11
+PyPDF2>=3.0
+python-docx>=1.1
+python-magic>=0.4.27
+
+
+
+# ── Backend: PDF report generation ──
+jinja2>=3.1
+weasyprint>=60.0
+
+
+# ── Backend: external services ──
+httpx>=0.27                  # async Supabase REST client
+groq>=0.13                   # Groq LLM client (0.13+ is required for httpx>=0.28 compatibility)
+PyJWT[crypto]>=2.8           # verifies Supabase access tokens (HS256)
+
+
+
+# ── Frontend ──
+streamlit>=1.32
+requests>=2.31
+supabase>=2.4                # frontend auth client (email/password + OAuth)
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Here we need to named this file as "requirements.txt" only because it is convention
+# As during deployment using Streamlit or any other framework, they generally searches for this 'requirements.txt' file to install all the libraries required 
+# A requirements.txt file is used to list all the Python packages your project depends on, so anyone can recreate the same environment easily.
+
+# To recreate the environment on another machine :-
+#---------------OR---------------------
+# To install the libraries that we want, we can write them in this "requirements.txt" file then do this :-
+# pip install -r requirements.txt
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Supabase :-
+# What it is: An open‑source backend‑as‑a‑service (BaaS).
+# Core idea: It gives you a Postgres database + authentication + storage + APIs out of the box.
+
+# Why it’s popular:
+# Instant REST and GraphQL APIs for your database.
+# Built‑in user authentication (email, OAuth, etc.).
+# File storage and edge functions.
+
+
+
+# hasing :-
+# Hashing = converting data (like a password, file, or string) into a fixed‑length digest using algorithms (SHA‑256, SHA‑512, etc.).
+# bscript includes functions to perform these hashing operations, often used for:
+# Data integrity → verifying that data hasn’t been altered.
+# Authentication → storing hashed passwords securely.
+# Blockchain/crypto contexts → hashing transactions or scripts.
+# General utilities → quick checksums or unique IDs.
+
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Streamlit :-
+# Streamlit is an open‑source Python framework designed to make it easy to build and share data apps, dashboards, and interactive machine learning demos with just a few lines of code.
+
+# What Streamlit does :-
+# - Lets you turn a Python script into a web app instantly.
+# - Focuses on simplicity — you don’t need HTML, CSS, or JavaScript.
+# - Perfect for data scientists, ML engineers, and analysts who want to showcase models or visualizations interactively.
+
+# Key Features :-
+# - Widgets: Sliders, buttons, text inputs, file uploaders.
+# - Charts: Native support for Matplotlib, Plotly, Altair, and more.
+# - Live updates: Apps auto‑refresh when you change code.
+# - Deployment: Easy to share via Streamlit Cloud or run locally.
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# pdfplumber>=0.11 :-
+# Purpose: Extracts text, tables, and metadata from PDF files with high accuracy.
+# Use case: When a candidate uploads a resume in PDF format, you can pull out the text and structured data (like tables or columns).
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# PyPDF2>=3.0 :-
+# Purpose: General PDF manipulation — splitting, merging, rotating, encrypting, or extracting metadata.
+# Use case: If you need to handle resumes beyond just text extraction (e.g., merge multiple PDFs, split pages, or check metadata).
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# python-docx>=1.1 :-
+# Purpose: Read and write Microsoft Word .docx files.
+# Use case: Many resumes are submitted in Word format. This library lets you extract text, headings, and styles, or even generate .docx reports.
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# python-magic>=0.4.27 :-
+# Purpose: Detects file type by inspecting its binary content (not just the extension).
+# Use case: Ensures the uploaded file is really a PDF, DOCX, or TXT — and not mislabeled or malicious.
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# jinja2>=3.1 :-
+# Purpose: Jinja2 is a templating engine for Python.
+# It lets you write HTML (or text) templates with placeholders that get filled dynamically.
+# Use case in ATS: You can design a resume report template (HTML) and inject candidate data, scores, and feedback into it.
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# weasyprint>=60.0 :-
+# Purpose: WeasyPrint converts HTML + CSS into PDF documents.
+# It’s like a headless browser that renders HTML/CSS and outputs a PDF.
+# Use case in ATS: After generating an HTML report with Jinja2, you can use WeasyPrint to export it as a professional PDF for download or sharing.
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# httpx>=0.27 :-
+# Modern async HTTP client for Python.
+# Used to make REST API calls efficiently (non‑blocking).
+# In your case: acts as the Supabase REST client, letting you query Supabase tables, auth, and storage asynchronously.
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# groq>=0.13 :-
+# Client library for Groq LLMs (Large Language Models).
+# Version 0.13+ is required because it ensures compatibility with newer httpx versions (>=0.28).
+# Lets you integrate Groq’s AI models for tasks like resume scoring, text analysis, or feedback generation.
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# PyJWT[crypto]>=2.8 :-
+# Handles JSON Web Tokens (JWTs).
+# Supabase issues JWTs for authentication.
+# This library verifies tokens (e.g., HS256 algorithm) to ensure requests are secure.
+# [crypto] extra adds cryptographic support (via cryptography package).
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# requests>=2.31 :-
+# Classic synchronous HTTP client.
+# Simpler than httpx, often used for quick API calls (e.g., fetching job descriptions, external APIs).
+# Useful when async isn’t needed
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# supabase>=2.4 :-
+# Official Supabase Python client.
+# Provides higher‑level abstractions over REST calls (auth, database queries, storage).
+# Easier than using raw httpx for common Supabase operations.
+
+
