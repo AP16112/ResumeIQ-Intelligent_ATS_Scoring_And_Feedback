@@ -205,7 +205,7 @@ async def delete_analysis(analysis_id: str, user_id: str) -> bool:
             return True
     except Exception as exc:
         logger.error(f"Failed to delete analysis {analysis_id}: {exc}")
-        return False
+        return False 
     
 
 
@@ -243,4 +243,8 @@ async def delete_analysis(analysis_id: str, user_id: str) -> bool:
 # Used to make REST API calls efficiently (non‑blocking).
 # In your case: acts as the Supabase REST client, letting you query Supabase tables, auth, and storage asynchronously.
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# JSONB format in PostgreSQL :-
+# JSONB is a data type in PostgreSQL that allows you to store JSON (JavaScript Object Notation) data in a binary format. It provides efficient storage and querying capabilities for JSON data, making it ideal for applications that need to handle semi-structured or unstructured data. With JSONB, you can easily store and manipulate complex data structures without needing to define a rigid schema, while still benefiting from indexing and fast access.
+# JSONB is a PostgreSQL data type that stores JSON (JavaScript Object Notation) data in a binary format rather than plain text.
 
