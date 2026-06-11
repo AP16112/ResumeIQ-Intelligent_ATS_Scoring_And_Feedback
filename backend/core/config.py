@@ -63,6 +63,8 @@ SPACY_MODEL_SECONDARY="en_core_web_sm"
 # So here it will use this 'all-MiniLM-L6-v2' model only if we don't have any other model specified in the .env file. If we have any other model specified in the .env file, then it will use that model instead of this default model. This way we can easily switch between different models by just changing the value of the environment variable in the .env file without changing the code. This makes our code more flexible and easier to maintain in the future.
 SENTENCE_TRANSFORMER_MODEL = os.getenv("SENTENCE_TRANSFORMER_MODEL", "all-MiniLM-L6-v2")
 # So here we are using transformers actually.
+# Now if we want to use our fine tune BERT model here, we can simply do that also by simply changing the value of this SENTENCE_TRANSFORMER_MODEL inside env file by the fine tune BERT model 
+
 
 
 # Score component weights - this is business logic treated as config
