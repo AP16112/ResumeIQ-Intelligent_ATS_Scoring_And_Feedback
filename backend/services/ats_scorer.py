@@ -152,11 +152,11 @@ def detect_location_info(text: str, nlp: spacy.Language) -> Dict:
         recommendations.append(" Consider reducing location mentions. 'City, State' in the contact header is sufficient.")
 
     return {
-        'location_found':     len(locations) > 0,
+        'location_found':  len(locations) > 0,
         'detected_locations': locations,
-        'privacy_risk':       privacy_risk,
-        'recommendations':    recommendations,
-        'penalty_applied':    penalty,
+        'privacy_risk':  privacy_risk,
+        'recommendations':  recommendations,
+        'penalty_applied':  penalty,
     }
 
 
