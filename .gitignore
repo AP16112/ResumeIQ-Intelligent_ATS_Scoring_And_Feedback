@@ -36,3 +36,13 @@ venv/
 # So here we are ignoring the whole .streamlit folder because it contains that secrets.toml file which is a secret file and we don't want to push it on github, so we are ignoring the whole .streamlit folder  
 
 dist/
+
+# Datasets
+*.csv
+
+# Logs
+*.log
+
+# ML models
+*.safetensors
+*.pkl
