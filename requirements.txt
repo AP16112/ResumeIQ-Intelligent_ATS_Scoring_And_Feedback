@@ -98,6 +98,9 @@ supabase>=2.4                # frontend auth client (email/password + OAuth)
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Here for frontend part, we will use streamlit actually.
+
+
 # Streamlit :-
 # Streamlit is an open‑source Python framework designed to make it easy to build and share data apps, dashboards, and interactive machine learning demos with just a few lines of code.
 

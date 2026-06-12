@@ -7,6 +7,9 @@
 # Provides helper functions to verify tokens and extract the current user’s identity
 
 
+# This file actually receives the token & then verify those tokens for authentication.
+
+
 # JWT :-
 # JWT (JSON Web Token) is a compact, secure way to transmit identity and claims between parties, often used for authentication and authorization in APIs. 
 # It encodes user information as a JSON object, digitally signed (and sometimes encrypted) so the recipient can trust its integrity.
@@ -33,6 +36,9 @@ import jwt
 # Decode payloads to extract the user ID (sub claim).
 # Handle different signing algorithms (HS256, RS256, ES256).
 # Without import jwt, none of those token verification functions would work.
+
+
+# SO this jwt is actually signed using secret key & it gets verified using public key.
 
 
 # here we are importing three important utilities from FastAPI that are commonly used in API route definitions
