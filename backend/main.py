@@ -177,6 +177,31 @@ app.add_middleware(
 app.include_router(router)
 
 
+
+# Here it defines the root endpoint (/) of our FastAPI application — essentially a welcome/info page:
+# FastAPI decorator that registers a GET endpoint at the root path /.
+# When someone visits http://localhost:8000/ (or your deployed API base URL), this function runs.
+# Returns a JSON response with:
+# name → The API’s name.
+# version → Current version (1.0.0).
+# endpoints → A dictionary listing available API routes and their purpose.
+@app.get('/')
+async def root():
+    return {
+        'name': 'ResumeIQ - Intelligent ATS scoring & feedback API',
+        'version': '1.0.0',
+        'endpoints': {
+            'POST   /api/v1/analyze-resume': 'Analyze a resume',
+            'GET    /api/v1/history':        'Get user history',
+            'DELETE /api/v1/history/:id':    'Delete a history entry',
+            'GET    /api/v1/health':         'Health check',
+            'POST   /api/v1/generate-pdf':   'Generate PDF report from data',
+        },
+    }
+
+
+
+
 if __name__ == '__main__':
     import uvicorn
 
@@ -286,7 +311,7 @@ if __name__ == '__main__':
 # JSONB is a data type in PostgreSQL that allows you to store JSON (JavaScript Object Notation) data in a binary format. It provides efficient storage and querying capabilities for JSON data, making it ideal for applications that need to handle semi-structured or unstructured data. With JSONB, you can easily store and manipulate complex data structures without needing to define a rigid schema, while still benefiting from indexing and fast access.
 # JSONB is a PostgreSQL data type that stores JSON (JavaScript Object Notation) data in a binary format rather than plain text.
 
-# -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # BERT :-
 # BERT (Bidirectional Encoder Representations from Transformers) is a landmark NLP model introduced by Google in 2018 that reads text bidirectionally, enabling deep contextual understanding and achieving state‑of‑the‑art results across many language tasks. 
 # It revolutionized how machines process language by pre‑training on massive text corpora and then fine‑tuning for specific tasks like question answering, sentiment analysis, and named entity recognition.
@@ -309,3 +334,5 @@ if __name__ == '__main__':
 # Contextual power: Understands meaning based on surrounding words.
 # Generalizability: One pre‑trained model can be fine‑tuned for many tasks.
 # Foundation model: Inspired modern LLMs like GPT, T5, and beyond.
+
+
