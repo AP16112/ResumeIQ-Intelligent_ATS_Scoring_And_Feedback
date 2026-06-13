@@ -1,3 +1,0 @@
-# Here this file will be needed for render deployment to make render know that we are using python 3.12.10 version of python
-
-python-3.12.10
