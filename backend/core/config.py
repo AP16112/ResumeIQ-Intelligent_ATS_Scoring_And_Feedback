@@ -31,10 +31,9 @@ APP_DESCRIPTION = "Analyse resumes against job description using NLP + ML"
 # For example, if our backend server is running on http://localhost:8000 & we don't have CORS enabled, then any frontend application can make a call or request to our backend server, but if we have CORS enabled and we have added the frontend URL in the allowed origins list, then only that frontend application can make a call or request to our backend server. This way we can restrict the access to our backend server and only allow the requests from our frontend application.
 # If any frontend those URL is not added in this allowed origins list, then that frontend will not be able to make a call or request to our backend server and it will get an error. This way we can ensure that only our frontend application can access our backend server and other applications cannot access it.
 ALLOWED_ORIGINS = [
-    # Here these are the URLs of our frontend applications which will be making requests to our backend server. So we need to add those URLs in this allowed origins list to enable CORS for those frontend applications.
-    "http://localhost:8501",            # streamlit server (Streamlit)
-    # Here this is streamlit app fallback URL, it means that if we are using Create streamlit App for our frontend development, then it will run on port 8501 by default. So we need to add this URL in the allowed origins list to enable CORS for our Create streamlit App frontend application.
-    "http://127.0.0.1:8501",
+    # Here these are the URLs of our deployed frontend applications which will be making requests to our backend server. So we need to add those URLs in this allowed origins list to enable CORS for those frontend applications.
+    # Here this is streamlit app deployed URL
+    "https://resumeiq-intelligent-ats-scoring-and-feedback-system.streamlit.app/"
 ]
 
 

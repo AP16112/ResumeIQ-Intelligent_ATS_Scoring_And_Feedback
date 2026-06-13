@@ -24,9 +24,7 @@ rapidfuzz>=3.6
 # A fast string matching and fuzzy search library for Python. Similar to fuzzywuzzy, but optimized for speed and lower memory usage.
 # Useful when you need to compare text and measure similarity (e.g., resume text vs. job description).
 
-torch==2.7.1+cpu
-# here this pins PyTorch to version 2.7.1, CPU‑only build (no GPU/CUDA support).
-torchvision==0.22.1+cpu
+torch==2.12.0+cpu
 --extra-index-url https://download.pytorch.org/whl/cpu
 # Here this Tells pip to look at the official PyTorch wheel repository for CPU builds. Without this, pip may not find the +cpu variants.
 
