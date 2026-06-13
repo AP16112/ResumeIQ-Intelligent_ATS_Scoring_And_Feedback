@@ -1,0 +1,27 @@
+[theme]
+primaryColor = "#4F46E5"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8FAFC"
+textColor = "#1E293B"
+font = "sans serif"
+
+[server]
+maxUploadSize = 10
+enableXsrfProtection = false
+enableCORS = false
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showSidebarNavigation = true
+toolbarMode = "minimal"
+
+
+
+# This config.toml file is a Streamlit configuration file that controls the theme, server behavior, browser settings, and client UI options for our app.
+# headless = true → Runs Streamlit without opening a browser window automatically (common in deployment).
+# maxUploadSize = 10 → Limits file uploads to 10 MB.
+# enableXsrfProtection = false → Disables CSRF protection (useful for local dev, but less secure).
+# enableCORS = false → Disables cross-origin requests.
