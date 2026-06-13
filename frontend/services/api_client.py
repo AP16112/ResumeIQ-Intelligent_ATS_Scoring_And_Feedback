@@ -21,7 +21,7 @@ import streamlit as st
 
 
 # If no custom backend URL is configured, the app assumes the backend is running locally on port 8000.
-DEFAULT_BACKEND_URL = "http://localhost:8000"
+DEFAULT_BACKEND_URL = "http://127.0.0.1:8000"
 
 
 # Accessing Dynamic backend URL :-
@@ -100,13 +100,13 @@ def analyze_resume(resume_file, access_token: str, job_description: str = "") ->
     # files=files → sends the resume file.
     # data=data → sends the job description.
     # headers=_auth_headers(access_token) → adds Authorization: Bearer <token>.
-    # timeout=180 → allows up to 3 minutes (useful for heavy NLP/ML processing)
+    # timeout=240 → allows up to 4 minutes (useful for heavy NLP/ML processing)
     response = requests.post(
         f"{_backend_url()}/api/v1/analyze-resume",
         files=files,
         data=data,
         headers=_auth_headers(access_token),
-        timeout=180,
+        timeout=240,
     )
 
     response.raise_for_status()

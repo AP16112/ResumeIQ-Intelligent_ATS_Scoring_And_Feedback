@@ -46,3 +46,19 @@ dist/
 # ML models
 *.safetensors
 *.pkl
+
+
+
+# Streamlit generates runtime logs here. They're large and change every run—no need to commit.
+.streamlit/logs/
+
+
+# Jupyter automatically creates these checkpoint folders in jupyter notebooks/. They're regenerated automatically.
+.ipynb_checkpoints/
+
+
+# These are error logs that change every run.
+*.err.log
+
+# These are output logs that shouldn't be committed.
+*.out.log
