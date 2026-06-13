@@ -51,17 +51,18 @@ _client = None
 
 # Here it defines a private helper function. And The expected output will be Groq client object
 def _get_client() -> Groq:
-    # Refers to the module‑level variable _client. Ensures the function modifies the shared _client instead of creating a local one.
     global _client
+
+    logger.info('Getting Groq client instance')
 
     if _client is None:
         api_key = os.getenv('GROQ_API_KEY')
 
         if not api_key:
+            logger.error('GROQ_API_KEY missing when initializing Groq client')
             raise ValueError("GROQ_API_KEY environment variable not set")
         
-        # Now we will create this Groq LLM client here to use the groq LLM actually
-        # Instantiates the Groq client using the API key. Stores it in _client for reuse.
+        logger.info('Initializing Groq client with timeout=%s max_retries=%s', GROQ_TIMEOUT_SECONDS, GROQ_MAX_RETRIES)
         _client = Groq(
             api_key=api_key,
             timeout=GROQ_TIMEOUT_SECONDS,
@@ -150,6 +151,8 @@ Resume Text:
 # Return type: str → Returns the model’s output as plain text (in this case, JSON).
 def _call_groq(client: Groq, system_prompt: str, user_prompt: str) -> str:
     started = perf_counter()
+    logger.info('Calling Groq model %s', GROQ_MODEL)
+    logger.debug('Groq system prompt length=%d user prompt length=%d', len(system_prompt), len(user_prompt))
 
     try:
         response = client.chat.completions.create(
@@ -161,17 +164,19 @@ def _call_groq(client: Groq, system_prompt: str, user_prompt: str) -> str:
             temperature=0.0,
             max_tokens=4096       # which is roughly around 3000 words
         )
+
+        output = response.choices[0].message.content.strip()
+        logger.info('Groq call returned %d characters', len(output))
+        return output
+    except Exception as exc:
+        logger.error('Groq call failed: %s', exc)
+        raise
     finally:
         logger.info(
             "Groq call finished in %.2fs using model %s",
             perf_counter() - started,
             GROQ_MODEL,
         )
-
-    # response.choices[0] → Takes the first generated completion.
-    # .message.content → Extracts the actual text output (the JSON string).
-    # .strip() → Removes leading/trailing whitespace, ensuring clean JSON.
-    return response.choices[0].message.content.strip()
 
 # client.chat.completions.create(...) :-
 # Calls Groq’s API to generate a chat completion.
@@ -196,12 +201,9 @@ def _call_groq(client: Groq, system_prompt: str, user_prompt: str) -> str:
 # Return tyep :- dict | None → Either a Python dictionary (if parsing succeeds) or None (if parsing fails).
 def _try_parse_json(text: str) -> dict | None:
     # Strip markdown code fences if present
-    cleaned = text.strip()   # .strip() removes leading/trailing whitespace.
+    cleaned = text.strip()
+    logger.debug('Attempting JSON parse; input length=%d', len(cleaned))
 
-    # LLMs often wrap JSON in markdown fences like: 
-    # ```json
-    # { "name": "Arpit" }
-    # ```
     if cleaned.startswith("```"):
         # Remove opening fence
         # If the text starts with triple backticks (```), it finds the first newline. Everything after that newline is kept (removing the opening fence).
@@ -217,11 +219,9 @@ def _try_parse_json(text: str) -> dict | None:
         cleaned = cleaned.strip()
 
     try:
-        # json.loads(...) is Python’s built‑in method to convert a JSON string into a Python dictionary.
         return json.loads(cleaned)
-    except json.JSONDecodeError:
-        # If the string is not valid JSON (e.g., malformed, missing quotes, trailing commas), json.loads raises a JSONDecodeError.
-        # Instead of crashing the program, the function catches this error. And It then returns None to signal “parsing failed.”
+    except json.JSONDecodeError as exc:
+        logger.warning('JSON parse failed: %s; response snippet=%r', exc, cleaned[:400])
         return None
 
 
@@ -230,21 +230,23 @@ def _try_parse_json(text: str) -> dict | None:
 # It takes raw_text → the resume text (plain string) which is get from resume_parser file.
 # Output: A Python dictionary (Dict) containing structured resume data (name, skills, experience, etc.).
 def parse_resume(raw_text: str) -> Dict:
+    logger.info('Starting resume parsing by Groq; raw_text_length=%d', len(raw_text or ''))
     client = _get_client()
 
-    # Fills the RESUME_USER_PROMPT template with the actual resume text. This creates a complete instruction string for the LLM, including the JSON schema and the resume content.
     prompt = RESUME_USER_PROMPT.format(raw_text=raw_text)
-
-    # Returns the raw output (expected to be JSON).
     raw_response = _call_groq(client, RESUME_SYSTEM_PROMPT, prompt)
+    logger.info('Groq resume raw response length=%d', len(raw_response or ''))
 
     # Attempts to parse the raw response into a Python dictionary. If parsing succeeds → result is a dict. If parsing fails → result is None.
     result = _try_parse_json(raw_response)
 
     if result is not None:
-        return _validate_resume_result(result)
+        validated = _validate_resume_result(result)
+        logger.info('Groq resume parse succeeded with %d keys', len(validated))
+        return validated
 
     logger.warning("Groq resume parse: first attempt returned invalid JSON, retrying...")
+    logger.warning('Groq resume raw response snippet=%r', raw_response[:400])
 
     strict_prompt = (
         "Your previous response was not valid JSON. "
@@ -310,18 +312,22 @@ Job Description Text:
 
 # This function parse_job_description is the job description counterpart to our parse_resume pipeline. It follows the same structure but is tailored to extracting structured information from a job description.
 def parse_job_description(raw_text: str) -> Dict:
+    logger.info('Starting job description parsing by Groq; text_length=%d', len(raw_text or ''))
     client = _get_client()
 
     prompt = JD_USER_PROMPT.format(raw_text=raw_text)
-
     raw_response = _call_groq(client, JD_SYSTEM_PROMPT, prompt)
+    logger.info('Groq JD raw response length=%d', len(raw_response or ''))
 
     result = _try_parse_json(raw_response)
 
     if result is not None:
-        return _validate_jd_result(result)
+        validated = _validate_jd_result(result)
+        logger.info('Groq JD parse succeeded with %d keys', len(validated))
+        return validated
 
     logger.warning("Groq JD parse: first attempt returned invalid JSON, retrying...")
+    logger.warning('Groq JD raw response snippet=%r', raw_response[:400])
     
     strict_prompt = (
         "Your previous response was not valid JSON. "

@@ -91,6 +91,12 @@ async def analyze_resume(
     job_description: str = Form('', description='Job description text (optional)'),
     user_id: str = Depends(get_current_user),
 ):
+    # %s means “insert a string representation here.”
+    logger.info('Received analyze_resume request. client=%s user_id=%s filename=%s job_description=%s',
+                request.client.host if request.client else 'unknown',
+                user_id,
+                resume.filename,
+                'yes' if job_description else 'no')
     request_started = perf_counter()
     
     # Initializes an empty list of strings called warnings.
@@ -111,6 +117,9 @@ async def analyze_resume(
         # file_bytes now contains the binary content of the uploaded resume (PDF or DOCX).
         file_bytes = await resume.read()
         filename = resume.filename or 'resume'    # Retrieves the original filename from the upload. If no filename is provided, defaults to "resume".
+        # %s → placeholder for a string (filename).
+        # %d → placeholder for an integer (len(file_bytes) and len(job_description or '')).
+        logger.info('Read resume upload: filename=%s size_bytes=%d job_description_length=%d', filename, len(file_bytes), len(job_description or ''))
 
         from backend.services.resume_parser import (
             FileParsingError,
@@ -118,11 +127,11 @@ async def analyze_resume(
             parse_resume_file,
         )
 
+        logger.info('Starting resume parsing for %s', filename)
         parse_started = perf_counter()
         resume_text, _metadata = parse_resume_file(file_bytes, filename)
-        
-        logger.info(f"Parsed '{filename}': {len(resume_text)} chars extracted")
-        logger.info("Resume parsing finished in %.2fs", perf_counter() - parse_started)
+        logger.info('Resume parsing succeeded for %s: extracted %d chars', filename, len(resume_text))
+        logger.info('Resume parsing finished in %.2fs', perf_counter() - parse_started)
 
     except Exception as exc:
         # Records the error in your application logs with severity ERROR.
@@ -142,6 +151,7 @@ async def analyze_resume(
     try:
         from backend.services.resume_analyzer import analyze_full_resume
         
+        logger.info('Starting full analysis pipeline for %s', filename)
         analysis_started = perf_counter()
         result = analyze_full_resume(
             resume_text=resume_text,
@@ -149,7 +159,8 @@ async def analyze_resume(
             embedder=embedder,
             job_description=job_description
         )
-        logger.info("Full analysis finished in %.2fs", perf_counter() - analysis_started)
+        logger.info('Full analysis pipeline succeeded for %s', filename)
+        logger.info('Full analysis finished in %.2fs', perf_counter() - analysis_started)
     except Exception as exc:
         logger.error(f'Full analysis pipeline failed: {exc}')
 
@@ -207,9 +218,10 @@ async def analyze_resume(
     try:
         from backend.database.supabase_db import save_analysis
 
+        logger.info('Saving analysis history for user %s and file %s', user_id, filename)
         save_started = perf_counter()
         await save_analysis(user_id, filename, result)
-        logger.info("History save finished in %.2fs", perf_counter() - save_started)
+        logger.info('History save finished in %.2fs', perf_counter() - save_started)
     except Exception as exc:
         logger.warning(f'History save failed (non-blocking): {exc}')
 
@@ -224,6 +236,7 @@ async def analyze_resume(
 # It Accepts the Request object, giving access to the app’s state.
 @router.get('/health')
 async def health_check(request: Request):
+    logger.info('Received health_check request from %s', request.client.host if request.client else 'unknown')
     # Docstring (""" ... """) :- Placed inside a function, class, or module.
     # Describes what the function/class/module does. Accessible at runtime via .__doc__ (e.g., health_check.__doc__).
     # Used by tools like FastAPI, Sphinx, or IDEs to generate documentation.

@@ -100,13 +100,13 @@ def analyze_resume(resume_file, access_token: str, job_description: str = "") ->
     # files=files → sends the resume file.
     # data=data → sends the job description.
     # headers=_auth_headers(access_token) → adds Authorization: Bearer <token>.
-    # timeout=240 → allows up to 4 minutes (useful for heavy NLP/ML processing)
+    # timeout=600 → allows up to 10 minutes (useful for heavy NLP/ML processing)
     response = requests.post(
         f"{_backend_url()}/api/v1/analyze-resume",
         files=files,
         data=data,
         headers=_auth_headers(access_token),
-        timeout=240,
+        timeout=600,
     )
 
     response.raise_for_status()

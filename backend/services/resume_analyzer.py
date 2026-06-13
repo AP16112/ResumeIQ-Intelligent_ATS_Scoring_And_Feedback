@@ -8,6 +8,7 @@
 
 
 
+import logging
 import spacy
 
 from sentence_transformers import SentenceTransformer
@@ -21,6 +22,8 @@ from backend.services.jd_matcher import compare_resume_with_jd
 from backend.services.feedback_engine import analyze_issues, generate_issues_summary
 from backend.services.ats_scorer import calculate_overall_score, validate_skills_with_projects
 
+logger = logging.getLogger('ats_resume_scorer')
+
 
 
 # The function is designed to perform a complete analysis of a resume.
@@ -28,14 +31,14 @@ from backend.services.ats_scorer import calculate_overall_score, validate_skills
 # resume_text: str :- The raw text extracted from the resume file (PDF/DOCX already parsed). Input for NLP and embedding models.
 # nlp: spacy.Language :- A spaCy language model instance (e.g., en_core_web_sm). Used for tokenization, named entity recognition, and skill extraction.
 def analyze_full_resume(resume_text: str, nlp: spacy.Language, embedder: SentenceTransformer, job_description: Optional[str] = None ) -> Dict:
-    # Python’s built-in logging framework for tracking events, errors, and debug information.
-    # Key uses:
-    # Helps you record messages at different severity levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
-    # Useful for debugging and monitoring applications without using print() everywhere.
     import logging
-
-    # Here we are defining the name  of our logger as 'ats_resume_scorer', so that we can easily identify the logs related to our application in the log files. This way we can keep track of the logs related to our application and also we can easily debug our application by looking at the logs. We will use this logger to log the errors and other important information in our application. This way we can easily debug our application and also we can keep track of the errors and other important information in our application.
     logger = logging.getLogger('ats_resume_scorer')
+
+    logger.info(
+        'Starting full resume analysis pipeline: resume_text_length=%d job_description_present=%s',
+        len(resume_text or ''),
+        bool(job_description and job_description.strip())
+    )
 
     parsed_resume = parse_resume(resume_text)
 
@@ -52,6 +55,9 @@ def analyze_full_resume(resume_text: str, nlp: spacy.Language, embedder: Sentenc
     projects = parsed_resume.get('projects', [])
     keywords = parsed_resume.get('keywords', [])
     action_verbs = parsed_resume.get('action_verbs', [])
+
+    logger.info('Parsed resume extracted %d skills, %d projects, %d keywords, %d action_verbs',
+                len(skills), len(projects), len(keywords), len(action_verbs))
 
     # sum(...) :- Adds up all the values produced by the generator. Produces the total months of experience.
     # e.g if user have two experience entries, 6 & 3 months, then sum = 3 + 6 = 9 months in total
@@ -71,12 +77,23 @@ def analyze_full_resume(resume_text: str, nlp: spacy.Language, embedder: Sentenc
         experience_entries=parsed_resume.get('experience', []),
         embedder=embedder,
     )
+    logger.info('Skill validation produced %d validated skills and %d unvalidated skills',
+                len(skill_validation.get('validated_skills', [])),
+                len(skill_validation.get('unvalidated_skills', [])))
 
     jd_comparison_result = None
     jd_keywords = None
 
     if job_description and job_description.strip():
+        logger.info('Starting job description comparison. JD length=%d', len(job_description.strip()))
         parsed_jd = parse_job_description(job_description.strip())
+
+        logger.info(
+            'Parsed JD keywords counts: required=%d preferred=%d keywords=%d',
+            len(parsed_jd.get('required_skills', [])),
+            len(parsed_jd.get('preferred_skills', [])),
+            len(parsed_jd.get('keywords', [])),
+        )
 
         # ["Python", "FastAPI"] + ["Docker", "Kubernetes"] + ["AWS"] → ["Python", "FastAPI", "Docker", "Kubernetes", "AWS"]
         jd_keywords = list(set(
@@ -94,6 +111,10 @@ def analyze_full_resume(resume_text: str, nlp: spacy.Language, embedder: Sentenc
             embedder = embedder,
             nlp = nlp,
         )
+        logger.info('JD comparison finished: matched=%d missing=%d skills_gap=%d',
+                    len(jd_comparison_result.get('matched_keywords', [])),
+                    len(jd_comparison_result.get('missing_keywords', [])),
+                    len(jd_comparison_result.get('skills_gap', [])))
 
     from backend.utils.file_utils import (
         get_default_grammar_results, get_default_location_results,
@@ -125,8 +146,10 @@ def analyze_full_resume(resume_text: str, nlp: spacy.Language, embedder: Sentenc
         scores=scores,
         contact_info=contact_info,
     )
+    logger.info('Generated %d detailed feedback items', len(detailed_feedback))
 
     issues_summary = generate_issues_summary(detailed_feedback)
+    logger.info('Generated issues summary with %d entries', len(issues_summary))
 
     validated_raw = skill_validation.get('validated_skills', [])
     unvalidated_raw = skill_validation.get('unvalidated_skills', [])
@@ -149,7 +172,17 @@ def analyze_full_resume(resume_text: str, nlp: spacy.Language, embedder: Sentenc
         "validation_pct": val_pct,
     }
 
-    return {
+    logger.info(
+        'Completed analysis scoring: overall_score=%s formatting=%s keywords=%s content=%s skill_validation=%s ats_compatibility=%s',
+        scores['overall_score'],
+        scores['formatting_score'],
+        scores['keywords_score'],
+        scores['content_score'],
+        scores['skill_validation_score'],
+        scores['ats_compatibility_score'],
+    )
+
+    result = {
         "ATS_score":  scores['overall_score'],
         "ats_score": scores['overall_score'],
         "component_scores": {
@@ -222,5 +255,7 @@ def _generate_strengths(
     
     if scores.get('content_score', 0) >= 20:
         strengths.append("Content quality is high with measurable achievements")
+
+    logger.info('Generated strengths list with %d entries', len(strengths))
 
     return strengths

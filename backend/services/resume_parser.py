@@ -12,6 +12,7 @@
 # So this resume_parser file will acts as the gateway between the input resume file & the backend & through this we will identify the type of file & other things.
 
 import io
+import logging
 import magic    # it is used to check the type of file like whether the uploaded pdf file is actually pdf or not
 # Actual pdf files internally in backend starts with %pdf sign
 
@@ -48,6 +49,8 @@ from backend.core.config import(
     SUPPORTED_MIME_TYPES      # this actually show the allowed file types which we mention in config file
 )
 
+logger = logging.getLogger('ats_resume_scorer')
+
 
 
 # Both inherit from Python’s built‑in Exception class.
@@ -76,6 +79,7 @@ class FileValidationError(Exception):
 # The function returns a tuple with three values. And this Optional[str] → MIME type (or None)
 def validate_file(file_data: bytes, filename: str) -> Tuple[bool, str, Optional[str]]:
     file_size_bytes = len(file_data)
+    log_info(f'Validating uploaded file {filename} ({file_size_bytes} bytes)', context='validate_file')
     # This variable holds the raw binary content of the file (e.g., a PDF or DOCX resume).Typically obtained by reading a file in binary mode.
     # Since file_data is a bytes object, len(file_data) gives the number of bytes in the file. This is effectively the file siz
     # e.g file_data = b"Hello World", then file_size_bytes = len(file_data), so this print(file_size_bytes)  # Output: 11
@@ -100,7 +104,9 @@ def validate_file(file_data: bytes, filename: str) -> Tuple[bool, str, Optional[
         # Uses magic to inspect the raw file bytes (file_data) and determine the MIME type (e.g., "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document").
         # This is more reliable than just checking the file extension.
         mime_type = magic.from_buffer(file_data, mime=True)
+        log_info(f'Detected MIME type {mime_type} for file {filename}', context='validate_file')
     except Exception as e:
+        log_error(e, context='validate_file')
         return False, f"error in determining the file type : {e}", None
     
 
@@ -108,6 +114,7 @@ def validate_file(file_data: bytes, filename: str) -> Tuple[bool, str, Optional[
         # here we are building a string of supported file types for the error message.
         supported = ', '.join(SUPPORTED_MIME_TYPES.keys()).upper()
 
+        log_warning(f'Unsupported MIME type {mime_type} for file {filename}', context='validate_file')
         return False, (
             f'Unsupported file type: {mime_type}. '
             f'Please upload one of: {supported}.'
@@ -259,7 +266,7 @@ def _extract_pdf_with_pypdf2(file_data: bytes) -> str:
 # This function is your main PDF text extraction pipeline.
 def extract_text_from_pdf(file_data: bytes) -> str:
     try:
-        # here we are using this with_fallback fn. with_fallback is a utility that tries one function first, then another if the first fails.
+        log_info('Extracting text from PDF', context='resume_parser')
         result, used_fallback = with_fallback(
             _extract_pdf_with_pdfplumber,
             _extract_pdf_with_pypdf2,
@@ -268,14 +275,16 @@ def extract_text_from_pdf(file_data: bytes) -> str:
         )
 
         if used_fallback:
-            log_info('PDF EXTRACTION succeeded using the PyPDF2 fallback', context='resume_parser')
+            log_info('PDF extraction succeeded using the PyPDF2 fallback', context='resume_parser')
+        else:
+            log_info('PDF extraction succeeded using pdfplumber', context='resume_parser')
 
         return result
     
     # It is the error‑handling section of your PDF text extraction function.
     except Exception as e:
-        # context='extract_text_from_pdf' tags the log entry so developers know where the error happened.
         log_error(e, context='extract_text_from_pdf')
+        logger.error('PDF extraction failed: %s', e)
 
         raise FileParsingError(
             'Failed to extract text from PDF using both pdfplumber and PyPDF2. '
@@ -334,6 +343,7 @@ def extract_text_from_docx(file_data: bytes) -> str:
             pass
 
         log_info(f'Extracted {len(text)} chars from DOCX', context='resume_parser')
+        logger.info('DOCX extraction succeeded; total chars=%d', len(text))
 
         return text.strip()
     
@@ -366,6 +376,7 @@ def extract_text_from_doc(file_data: bytes) -> str:
 
 # So this fn will acts as the orchestrator for all the specialized parsing functions & controls all these functions
 def extract_text(file_data: bytes, file_type: str) -> str:
+    logger.info('Extracting text for file_type=%s', file_type)
     if file_type=='pdf':
         return extract_text_from_pdf(file_data)
     elif file_type=='docx':
@@ -373,6 +384,7 @@ def extract_text(file_data: bytes, file_type: str) -> str:
     elif file_type=='doc':
         return extract_text_from_doc(file_data)
     else:
+        logger.error('Unsupported file type requested: %s', file_type)
         raise FileValidationError(
             f'Invalid file type: {file_type}. Supported types are: pdf, docx and doc'
         )
@@ -387,16 +399,19 @@ def extract_text(file_data: bytes, file_type: str) -> str:
 # "pages" → number of pages (for PDFs).
 # "extraction_method" → which parser was used (pdfplumber, PyPDF2, python-docx)
 def parse_resume_file(file_data: bytes, filename: str) -> Tuple[str, dict]:
-    log_info(f'parsing file :{filename}', context='parse_Resume_file')
+    logger.info('Starting parse_resume_file for %s', filename)
+    log_info(f'Parsing file: {filename}', context='parse_resume_file')
 
     # Phase 1 : validate file :-
     try:
         is_valid, error_msg, file_type = validate_file(file_data, filename)
 
         if not is_valid:
-            log_warning(f'validation failed for file {filename}', context='parse_resume_file')
+            log_warning(f'Validation failed for file {filename}: {error_msg}', context='parse_resume_file')
 
             raise FileValidationError(error_msg)
+
+        log_info(f'File validated as {file_type} for {filename}', context='parse_resume_file')
     
     except FileValidationError as e:
         raise 
@@ -411,11 +426,13 @@ def parse_resume_file(file_data: bytes, filename: str) -> Tuple[str, dict]:
 
     # Phase 2 : extraction of file :-
     try:
+        log_info(f'Starting text extraction for {filename} using type {file_type}', context='parse_resume_file')
         text = extract_text(file_data, file_type)
 
         log_info(f'Extracted {len(text)} chars from {filename}', context='parse_resume_file')
 
     except FileParsingError:
+        log_warning(f'File parsing failed for {filename}', context='parse_resume_file')
         raise   # Re-raise unchanged
 
     except Exception as e:
@@ -434,6 +451,7 @@ def parse_resume_file(file_data: bytes, filename: str) -> Tuple[str, dict]:
         'success': True,
     }
 
+    logger.info('Finished parse_resume_file for %s file_type=%s text_length=%d', filename, file_type, len(text))
     return text, metadata
        
 
