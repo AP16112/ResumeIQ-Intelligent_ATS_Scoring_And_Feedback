@@ -206,7 +206,7 @@ if __name__ == '__main__':
     import uvicorn
 
     uvicorn.run(
-        'backend.main.app',
+        'backend.main:app',
         host = '0.0.0.0',
         port = 8000,
         reload = True,    # Auto-restart on code changes (dev only)
@@ -334,5 +334,3 @@ if __name__ == '__main__':
 # Contextual power: Understands meaning based on surrounding words.
 # Generalizability: One pre‑trained model can be fine‑tuned for many tasks.
 # Foundation model: Inspired modern LLMs like GPT, T5, and beyond.
-
-

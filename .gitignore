@@ -31,7 +31,7 @@ __pycache__/
 
 venv/
 
-.streamlit/secrets.toml  
+secrets.toml  
 # all the environment variable of streamlit are not kept in .env file but kept in a secret file called as 'secrets.toml' inside this .streamlit folder
 # So here we are ignoring that secrets.toml file which is a secret file and we don't want to push it on github
 

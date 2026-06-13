@@ -7,6 +7,7 @@
 # Helps you record messages at different severity levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
 # Useful for debugging and monitoring applications without using print() everywhere.
 import logging
+from time import perf_counter
 
 # here we are importing this Dict, Optional from the typing module to use them in our code for type hinting. This way we can easily identify the types of the variables and also we can easily debug our application by looking at the type hints in our code. This way we can keep our code organized and modular by using type hints in our code. We will write all the logging related code in this file only, so that we can keep our code organized and modular.
 from typing import List, Optional
@@ -90,6 +91,7 @@ async def analyze_resume(
     job_description: str = Form('', description='Job description text (optional)'),
     user_id: str = Depends(get_current_user),
 ):
+    request_started = perf_counter()
     
     # Initializes an empty list of strings called warnings.
     # This will likely be used to collect cautionary messages during resume analysis (e.g., “File too large”, “Missing job description”, “Low keyword match”).
@@ -116,9 +118,11 @@ async def analyze_resume(
             parse_resume_file,
         )
 
+        parse_started = perf_counter()
         resume_text, _metadata = parse_resume_file(file_bytes, filename)
         
         logger.info(f"Parsed '{filename}': {len(resume_text)} chars extracted")
+        logger.info("Resume parsing finished in %.2fs", perf_counter() - parse_started)
 
     except Exception as exc:
         # Records the error in your application logs with severity ERROR.
@@ -138,12 +142,14 @@ async def analyze_resume(
     try:
         from backend.services.resume_analyzer import analyze_full_resume
         
+        analysis_started = perf_counter()
         result = analyze_full_resume(
             resume_text=resume_text,
             nlp=nlp,
             embedder=embedder,
             job_description=job_description
         )
+        logger.info("Full analysis finished in %.2fs", perf_counter() - analysis_started)
     except Exception as exc:
         logger.error(f'Full analysis pipeline failed: {exc}')
 
@@ -201,9 +207,13 @@ async def analyze_resume(
     try:
         from backend.database.supabase_db import save_analysis
 
+        save_started = perf_counter()
         await save_analysis(user_id, filename, result)
+        logger.info("History save finished in %.2fs", perf_counter() - save_started)
     except Exception as exc:
         logger.warning(f'History save failed (non-blocking): {exc}')
+
+    logger.info("Analyze resume request finished in %.2fs", perf_counter() - request_started)
 
     return response
 
@@ -360,3 +370,5 @@ async def generate_history_pdf(
         logger.error(f'Failed to generate PDF for history: {e}')
         
         raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {e}")
+
+

@@ -26,6 +26,7 @@
 import os    # here we are importing the os module to use the os.path.join to create the log directory and also to create the log file in that directory. This way we can keep our logs organized in a separate directory and also we can easily identify the logs related to our application by looking at the log files in that directory. This way we can keep track of the logs related to our application and also we can easily debug our application by looking at the log files in that directory. We will write all the logging related code in this file only, so that we can keep our code organized and modular.
 import json 
 import logging    # it is used for logging the errors and other information in our application. It helps us to keep track of the errors and other important information in our application. We can use it to log the errors, warnings, and other information in our application. This way we can easily debug our application and also we can keep track of the errors and other important information in our application. We will write all the logging related code in this file only, so that we can keep our code organized and modular.
+from time import perf_counter
 
 from typing import Dict
 # here we are importing this Dict from the typing module to use them in our code for type hinting. This way we can easily identify the types of the variables and also we can easily debug our application by looking at the type hints in our code. This way we can keep our code organized and modular by using type hints in our code. We will write all the logging related code in this file only, so that we can keep our code organized and modular.
@@ -36,6 +37,8 @@ from groq import Groq
 logger = logging.getLogger('ats_resume_scorer')
 
 GROQ_MODEL = 'llama-3.3-70b-versatile'     # we will use this LLM model of Groq here
+GROQ_TIMEOUT_SECONDS = 60
+GROQ_MAX_RETRIES = 1
 
 
 # In Python, putting an underscore (_) at the front of a function name (like _get_headers) is a naming convention that signals: Private / internal use
@@ -59,7 +62,11 @@ def _get_client() -> Groq:
         
         # Now we will create this Groq LLM client here to use the groq LLM actually
         # Instantiates the Groq client using the API key. Stores it in _client for reuse.
-        _client = Groq(api_key=api_key)
+        _client = Groq(
+            api_key=api_key,
+            timeout=GROQ_TIMEOUT_SECONDS,
+            max_retries=GROQ_MAX_RETRIES,
+        )
 
     return _client
 
@@ -142,16 +149,24 @@ Resume Text:
 # client: Groq → The Groq client object (already initialized with API key).
 # Return type: str → Returns the model’s output as plain text (in this case, JSON).
 def _call_groq(client: Groq, system_prompt: str, user_prompt: str) -> str:
+    started = perf_counter()
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL, 
-        messages=[
-            {'role': 'system', 'content': system_prompt},
-            {'role': 'user', 'content': user_prompt}
-        ],
-        temperature=0.0,
-        max_tokens=4096       # which is roughly around 3000 words
-    )
+    try:
+        response = client.chat.completions.create(
+            model=GROQ_MODEL, 
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_prompt}
+            ],
+            temperature=0.0,
+            max_tokens=4096       # which is roughly around 3000 words
+        )
+    finally:
+        logger.info(
+            "Groq call finished in %.2fs using model %s",
+            perf_counter() - started,
+            GROQ_MODEL,
+        )
 
     # response.choices[0] → Takes the first generated completion.
     # .message.content → Extracts the actual text output (the JSON string).

@@ -24,6 +24,8 @@ logger = logging.getLogger('ats_resume_scorer')
 
 from backend.core.config import SUPABASE_URL, SUPABASE_KEY
 
+SUPABASE_TIMEOUT_SECONDS = 25
+
 
 # In Python, putting an underscore (_) at the front of a function name (like _get_headers) is a naming convention that signals: Private / internal use
 # It tells other developers: “This function is meant for internal use inside this module/class, not part of the public API.”
@@ -98,10 +100,10 @@ async def save_analysis(user_id: str, filename: str, analysis_result: Dict) -> O
     # Builds the REST endpoint for the analysis table in Supabase.
     # rstrip('/') ensures no duplicate slashes if SUPABASE_URL already ends with /.
     # Final URL looks like :-  https://<project>.supabase.co/rest/v1/analysis
-    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1.analysis"
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/analyses"
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT_SECONDS) as client:
             response = await client.post(url, headers=headers, json=doc)
             # Uses httpx.AsyncClient for non‑blocking HTTP calls. Sends a POST request to Supabase with:
             # headers → authentication (apikey, Authorization, etc.).
@@ -135,7 +137,7 @@ async def get_user_history(user_id: str) -> List[Dict]:
     url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/analyses"
 
     try: 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT_SECONDS) as client:
             # await :- Used inside an async function to pause execution until the awaited task finishes. While waiting, Python can switch to other tasks (like handling another user’s request).
             # Once the awaited task completes, execution resumes right after the await.
             response = await client.get(     #             Sends a GET request to Supabase REST API.
@@ -191,7 +193,7 @@ async def delete_analysis(analysis_id: str, user_id: str) -> bool:
     url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/analyses"
 
     try: 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT_SECONDS) as client:
             response = await client.get(
                 url,
                 headers=headers,

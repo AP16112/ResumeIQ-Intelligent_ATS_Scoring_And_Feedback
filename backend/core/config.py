@@ -27,15 +27,14 @@ APP_DESCRIPTION = "Analyse resumes against job description using NLP + ML"
 
 # Allowed origins for CORS (Cross-Origin Resource Sharing)
 # CORS is a security feature implemented by web browsers to restrict web applications running on one origin (domain) from interacting with resources from a different origin. This is done to prevent malicious websites from making unauthorized requests to other websites on behalf of the user.
-# In our case, we will be running our frontend (React) on a different port (5173) than our backend (FastAPI) which is running on port 8000. So we need to allow the requests from our frontend to our backend by adding the frontend URL in the allowed origins list. This way we can enable CORS for our frontend and allow it to make requests to our backend without any issues.
+# In our case, we will be running our frontend (Streamlit) on a different port (8501) than our backend (FastAPI) which is running on port 8000. So we need to allow the requests from our frontend to our backend by adding the frontend URL in the allowed origins list. This way we can enable CORS for our frontend and allow it to make requests to our backend without any issues.
 # For example, if our backend server is running on http://localhost:8000 & we don't have CORS enabled, then any frontend application can make a call or request to our backend server, but if we have CORS enabled and we have added the frontend URL in the allowed origins list, then only that frontend application can make a call or request to our backend server. This way we can restrict the access to our backend server and only allow the requests from our frontend application.
 # If any frontend those URL is not added in this allowed origins list, then that frontend will not be able to make a call or request to our backend server and it will get an error. This way we can ensure that only our frontend application can access our backend server and other applications cannot access it.
 ALLOWED_ORIGINS = [
     # Here these are the URLs of our frontend applications which will be making requests to our backend server. So we need to add those URLs in this allowed origins list to enable CORS for those frontend applications.
-    "http://localhost:5173",            # vite dev server (React)
-    "http://localhost:3000",            # Create React App fallback
-    # Here this is react app fallback URL, it means that if we are using Create React App for our frontend development, then it will run on port 3000 by default. So we need to add this URL in the allowed origins list to enable CORS for our Create React App frontend application.
-    "http://127.0.0.1:5173",
+    "http://localhost:8501",            # streamlit server (Streamlit)
+    # Here this is streamlit app fallback URL, it means that if we are using Create streamlit App for our frontend development, then it will run on port 8501 by default. So we need to add this URL in the allowed origins list to enable CORS for our Create streamlit App frontend application.
+    "http://127.0.0.1:8501",
 ]
 
 
