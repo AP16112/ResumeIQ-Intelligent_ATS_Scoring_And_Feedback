@@ -62,3 +62,11 @@ dist/
 
 # These are output logs that shouldn't be committed.
 *.out.log
+
+
+upload_model.py
+
+
+# Ignore local fine-tuned model folder
+ml_model/
+
