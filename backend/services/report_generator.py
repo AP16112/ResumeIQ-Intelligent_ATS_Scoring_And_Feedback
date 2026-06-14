@@ -218,6 +218,6 @@ def generate_html_reports(analysis_data: Dict) -> Dict[str, str]:
     return {
         'summary':  env.get_template('summary.html').render(**context),
         'skill_report': env.get_template('action_items.html').render(**context),
-        'jd_report':  env.get_template('quick_actions.html').render(**context),
-        'recommendations': env.get_template('jd_comparison.html').render(**context),
+        'jd_report':  env.get_template('jd_comparison.html').render(**context),
+        'recommendations': env.get_template('quick_actions.html').render(**context),
     }
