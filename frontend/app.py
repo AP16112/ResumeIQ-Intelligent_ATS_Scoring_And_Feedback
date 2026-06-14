@@ -163,7 +163,7 @@ with st.sidebar:
         st.session_state.current_view = 'landing'
         st.rerun()
     
-    if st.button("🎯 ATS Scorer", use_container_width=True):
+    if st.button("🎯 ATS Score", use_container_width=True):
         st.session_state.current_view = 'scorer'
         st.rerun()
     

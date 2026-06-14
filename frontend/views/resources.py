@@ -17,11 +17,11 @@ def render():
     with col1:
         st.markdown("""
         ### ✅ Do's
-        - Use standard section headings
-        - Include relevant keywords from job description
-        - Use simple, clean formatting
+        - Use clear, standard section headings (e.g., Education, Experience, Skills)
+        - Incorporate relevant keywords from the job description
+        - Keep formatting simple, consistent, and easy to scan
         - List skills explicitly
-        - Quantify achievements with numbers
+        - Highlight achievements with measurable results (numbers, percentages, impact)
         - Use standard fonts (Arial, Calibri, Times New Roman)
         - Save as PDF or DOCX
         """)
@@ -51,29 +51,30 @@ def render():
     
     with tab1:
         st.markdown("""
-        **Software Development:**
-        - Programming languages (Python, Java, JavaScript)
-        - Frameworks (React, Django, Spring)
-        - Tools (Git, Docker, Kubernetes)
-        - Methodologies (Agile, Scrum, CI/CD)
+        ### Software Development :- 
+        - **Languages:** Python, Java, JavaScript  
+        - **Frameworks & Libraries:** React, Django, Spring  
+        - **Tools & Platforms:** Git, Docker, Kubernetes  
+        - **Practices:** Agile, Scrum, CI/CD 
         """)
     
     with tab2:
         st.markdown("""
-        **Business & Management:**
-        - Project management
-        - Stakeholder engagement
-        - Budget management
-        - Strategic planning
-        - Team leadership
+        ### Business & Management :- 
+        - **Project Management:** Planning, execution, and delivery  
+        - **Stakeholder Engagement:** Communication and collaboration across teams  
+        - **Budget Oversight:** Resource allocation and financial tracking  
+        - **Strategic Planning:** Long-term vision and goal setting  
+        - **Team Leadership:** Guiding, mentoring, and motivating teams
         """)
     
     with tab3:
         st.markdown("""
-        **Creative & Design:**
-        - Adobe Creative Suite
-        - UI/UX Design
-        - Wireframing & Prototyping
-        - Brand identity
-        - Visual communication
+        ### Creative & Design :- 
+        - **Design Tools:** Adobe Creative Suite (Photoshop, Illustrator, XD)  
+        - **UI/UX Design:** User-centered interfaces and experiences  
+        - **Wireframing & Prototyping:** Turning ideas into interactive mockups  
+        - **Brand Identity:** Logos, typography, and cohesive visual systems  
+        - **Visual Communication:** Storytelling through graphics and layouts 
         """)
+

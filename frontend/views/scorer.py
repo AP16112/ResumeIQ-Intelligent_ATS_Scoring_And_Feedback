@@ -59,7 +59,7 @@ def _show_backend_error(exc: Exception) -> None:
     """Translate a `requests` exception into a friendly Streamlit error."""
     
     if isinstance(exc, requests.ConnectionError):
-        st.error("Could not reach the backend. Is `uvicorn backend.main:app` running on port 8000?")
+        st.error("Could not reach the backend. Check URL is valid or not?")
     elif isinstance(exc, requests.Timeout):
         st.error("The backend took too long to respond. Try a smaller resume or check the server logs.")
     elif isinstance(exc, requests.HTTPError) and exc.response is not None:
@@ -254,7 +254,7 @@ def _render_export_buttons(analysis: dict) -> None:
 
 
 def render() -> None:
-    st.title("🎯 ATS Resume Scorer")
+    st.title("🎯 ATS Resume Score")
 
     st.markdown("Upload your resume — and optionally a job description — for a comprehensive analysis.")
 
