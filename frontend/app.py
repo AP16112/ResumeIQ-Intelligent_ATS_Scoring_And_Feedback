@@ -156,9 +156,6 @@ if 'current_view' not in st.session_state:
 
 # Sidebar navigation
 with st.sidebar:
-    # Add logo at the top of the sidebar
-    st.image("./frontend/assets/logo.png", use_column_width=True)
-
     st.markdown("## Navigation")
     
     # use_container_width=True makes the button stretch to fill the available width of its container (for a cleaner layout).
