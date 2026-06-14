@@ -25,23 +25,32 @@ def _show_backend_error(exc: Exception) -> None:
 
 
 
-
-# This function is a date formatter utility — it takes an ISO‑style timestamp string and converts it into a human‑readable format.
+# This function converts an ISO-style timestamp string (e.g., from Supabase timestamptz) into a human-readable date string using a specified format.
 def format_date(value, fmt='%B %d, %Y at %I:%M %p'):
     """Convert ISO timestamp string → human-readable date string."""
+    
+    # If the value is empty or None, return an empty string immediately.
     if not value:
         return ''
     
     try:
-        # ISO timestamps often end with "Z" (Zulu time = UTC).
-        # datetime.fromisoformat doesn’t understand "Z", so it’s replaced with "+00:00" (UTC offset).
+        # Supabase timestamptz often ends with "+00" instead of "+00:00".
+        # datetime.fromisoformat requires the full offset format, so normalize it.
+        if isinstance(value, str) and value.endswith('+00'):
+            value = value.replace('+00', '+00:00')
+        
+        # Handle the case where timestamps end with "Z" (Zulu time = UTC).
+        # datetime.fromisoformat doesn’t understand "Z", so replace with "+00:00".
         dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-        # Converts the datetime object into a string using the format specified.
-        # Example: "2026-06-12T09:53:00Z" → "June 12, 2026 at 09:53 AM".
+        
+        # Convert the datetime object into a string using the provided format.
+        # Example: "2026-06-14T11:02:26+00:00" → "June 14, 2026 at 11:02 AM".
         return dt.strftime(fmt)
-    except Exception:
-        return value     # If parsing fails (e.g., invalid timestamp string), return the original value unchanged.
     
+    except Exception:
+        # If parsing fails (e.g., invalid timestamp string), return the original value unchanged.
+        return value
+
 # value: the timestamp string (usually ISO 8601 format, e.g., "2026-06-12T09:53:00Z").
 # fmt: optional format string for output. Default is '%B %d, %Y at %I:%M %p'.
 # %B → full month name (e.g., June)
@@ -109,7 +118,7 @@ def render() -> None:
         # st.expander(...) :- Creates a collapsible container in the UI.
         # The label is dynamically built using f‑string formatting: 📄 → document emoji, {filename} → the resume file name (e.g., "resume1.pdf"), {ats_score:.0f}/100 → the ATS score rounded to 0 decimal places (e.g., "85/100")
         # Users can click this expander to reveal detailed metrics for that analysis.
-        with st.expander(f"📄 {filename}  —  Score: {ats_score:.0f}/100  —  {format_date(created_at.isoformat())}"):
+        with st.expander(f"📄 {filename}  —  Score: {ats_score:.0f}/100  —  {format_date(created_at)}"):
             c1, c2, c3 = st.columns(3)
 
             with c1:
