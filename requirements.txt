@@ -57,7 +57,7 @@ PyJWT[crypto]>=2.8           # verifies Supabase access tokens (HS256)
 
 # ── Frontend ──
 streamlit>=1.32
-requests>=2.31
+requests>=2.28,<2.32
 supabase>=2.4                # frontend auth client (email/password + OAuth)
 
 
