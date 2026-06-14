@@ -14,21 +14,10 @@
 import io
 import logging
 
+import os
 
 import magic    # it is used to check the type of file like whether the uploaded pdf file is actually pdf or not
 # Actual pdf files internally in backend starts with %pdf sign
-
-def get_magic():
-    """
-    Bind python-magic directly to the magic.mgc database.
-    This works on Debian trixie (Streamlit Cloud) and locally.
-    """
-    return magic.Magic(mime=True, magic_file="/usr/share/misc/magic.mgc")
-
-# Global instance
-magic_instance = get_magic()
-
-
 
 
 from typing import Tuple, Optional
@@ -119,7 +108,18 @@ def validate_file(file_data: bytes, filename: str) -> Tuple[bool, str, Optional[
         # Uses magic to inspect the raw file bytes (file_data) and determine the MIME type (e.g., "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document").
         # This is more reliable than just checking the file extension.
         # mime_type = magic.from_buffer(file_data, mime=True)
-        mime_type = magic_instance.from_buffer(file_data)
+
+        ext = os.path.splitext(filename)[1].lower()
+        
+        if ext == ".pdf":
+            mime_type = "application/pdf"
+        elif ext == ".doc":
+            mime_type = "application/msword"
+        elif ext == ".docx":
+            mime_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        else:
+            mime_type = None
+
         log_info(f'Detected MIME type {mime_type} for file {filename}', context='validate_file')
     except Exception as e:
         log_error(e, context='validate_file')
