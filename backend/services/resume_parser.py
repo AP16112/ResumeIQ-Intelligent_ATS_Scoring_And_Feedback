@@ -16,7 +16,7 @@ import logging
 
 import os
 
-import magic    # it is used to check the type of file like whether the uploaded pdf file is actually pdf or not
+# import magic    # it is used to check the type of file like whether the uploaded pdf file is actually pdf or not
 # Actual pdf files internally in backend starts with %pdf sign
 
 
@@ -110,7 +110,7 @@ def validate_file(file_data: bytes, filename: str) -> Tuple[bool, str, Optional[
         # mime_type = magic.from_buffer(file_data, mime=True)
 
         ext = os.path.splitext(filename)[1].lower()
-        
+
         if ext == ".pdf":
             mime_type = "application/pdf"
         elif ext == ".doc":
