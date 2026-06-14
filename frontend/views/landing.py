@@ -73,11 +73,12 @@ def render():
     
     with col3:
         st.markdown("""
-        ### 🔒 Privacy First
-        Resume files are handled securely. Parsing uses Groq’s hosted models, and authentication/storage use Supabase.
-        We never share your data outside these trusted services.
-        
-        **Confidential & Secure**
+            ### 🔒 Privacy & Security
+            Your resumes are analyzed exclusively with our fine‑tuned BERT model hosted on Hugging Face, ensuring the evaluation runs only on models we control.  
+            Parsing leverages Groq’s secure infrastructure, while authentication and storage are handled through Supabase.  
+            We never expose or share your data outside these trusted services — your information remains confidential and protected.  
+
+            **Confidential • Secure • Trusted**
         """)
     
     st.markdown("---")
