@@ -33,7 +33,7 @@ APP_DESCRIPTION = "Analyse resumes against job description using NLP + ML"
 ALLOWED_ORIGINS = [
     # Here these are the URLs of our deployed frontend applications which will be making requests to our backend server. So we need to add those URLs in this allowed origins list to enable CORS for those frontend applications.
     # Here this is streamlit app deployed URL
-    "https://resumeiq-intelligent-ats-scoring-and-feedback-system.streamlit.app/"
+    "https://resumeiq-ap.streamlit.app/"
 ]
 
 

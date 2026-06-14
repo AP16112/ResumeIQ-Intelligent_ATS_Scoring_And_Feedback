@@ -182,7 +182,7 @@ def analyze_full_resume(resume_text: str, nlp: spacy.Language, embedder: Sentenc
         scores['ats_compatibility_score'],
     )
 
-    result = {
+    return {
         "ATS_score":  scores['overall_score'],
         "ats_score": scores['overall_score'],
         "component_scores": {
@@ -259,3 +259,4 @@ def _generate_strengths(
     logger.info('Generated strengths list with %d entries', len(strengths))
 
     return strengths
+
