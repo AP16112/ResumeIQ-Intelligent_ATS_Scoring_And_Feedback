@@ -4,6 +4,8 @@ import requests
 
 import streamlit as st
 
+from datetime import datetime
+
 
 # Here we are importing a custom module called api_client from our project’s frontend/services package.
 from frontend.services import api_client
@@ -19,6 +21,34 @@ def _show_backend_error(exc: Exception) -> None:
         st.error(f"Backend returned {exc.response.status_code}: {exc.response.text}")
     else:
         st.error(f"Unexpected error: {exc}")
+
+
+
+
+
+# This function is a date formatter utility — it takes an ISO‑style timestamp string and converts it into a human‑readable format.
+def format_date(value, fmt='%B %d, %Y at %I:%M %p'):
+    """Convert ISO timestamp string → human-readable date string."""
+    if not value:
+        return ''
+    
+    try:
+        # ISO timestamps often end with "Z" (Zulu time = UTC).
+        # datetime.fromisoformat doesn’t understand "Z", so it’s replaced with "+00:00" (UTC offset).
+        dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        # Converts the datetime object into a string using the format specified.
+        # Example: "2026-06-12T09:53:00Z" → "June 12, 2026 at 09:53 AM".
+        return dt.strftime(fmt)
+    except Exception:
+        return value     # If parsing fails (e.g., invalid timestamp string), return the original value unchanged.
+    
+# value: the timestamp string (usually ISO 8601 format, e.g., "2026-06-12T09:53:00Z").
+# fmt: optional format string for output. Default is '%B %d, %Y at %I:%M %p'.
+# %B → full month name (e.g., June)
+# %d → day of the month (e.g., 12)
+# %Y → 4‑digit year (e.g., 2026)
+# %I:%M %p → 12‑hour time with AM/PM (e.g., 09:53 AM)
+# So the default output looks like: "June 12, 2026 at 09:53 AM".
 
 
 
@@ -79,7 +109,7 @@ def render() -> None:
         # st.expander(...) :- Creates a collapsible container in the UI.
         # The label is dynamically built using f‑string formatting: 📄 → document emoji, {filename} → the resume file name (e.g., "resume1.pdf"), {ats_score:.0f}/100 → the ATS score rounded to 0 decimal places (e.g., "85/100")
         # Users can click this expander to reveal detailed metrics for that analysis.
-        with st.expander(f"📄 {filename} — Score: {ats_score:.0f}/100 — {created_at}"):
+        with st.expander(f"📄 {filename}  —  Score: {ats_score:.0f}/100  —  {format_date(created_at.isoformat())}"):
             c1, c2, c3 = st.columns(3)
 
             with c1:
