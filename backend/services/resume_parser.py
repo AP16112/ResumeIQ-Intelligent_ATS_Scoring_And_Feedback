@@ -15,30 +15,19 @@ import io
 import logging
 
 
-import glob
 import magic    # it is used to check the type of file like whether the uploaded pdf file is actually pdf or not
 # Actual pdf files internally in backend starts with %pdf sign
 
-# Explicitly load libmagic from system path
 def get_magic():
-    # Find the shared library
-    lib_candidates = glob.glob("/usr/lib/**/libmagic.so*", recursive=True)
-    if not lib_candidates:
-        raise RuntimeError("libmagic shared library not found")
+    """
+    Bind python-magic directly to the magic.mgc database.
+    This works on Debian trixie (Streamlit Cloud) and locally.
+    """
+    return magic.Magic(mime=True, magic_file="/usr/share/misc/magic.mgc")
 
-    # Find the magic database file (*.mgc)
-    mgc_candidates = glob.glob("/usr/share/misc/magic.mgc")
-    if not mgc_candidates:
-        raise RuntimeError("magic.mgc database file not found")
-
-    print("Using libmagic at:", lib_candidates[0])
-    print("Using magic.mgc at:", mgc_candidates[0])
-
-    # Bind both
-    return magic.Magic(mime=True, magic_file=mgc_candidates[0])
-
-
+# Global instance
 magic_instance = get_magic()
+
 
 
 
