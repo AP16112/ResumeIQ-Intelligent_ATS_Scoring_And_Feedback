@@ -194,7 +194,7 @@ async def delete_analysis(analysis_id: str, user_id: str) -> bool:
 
     try: 
         async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT_SECONDS) as client:
-            response = await client.get(
+            response = await client.delete(
                 url,
                 headers=headers,
                 params={
