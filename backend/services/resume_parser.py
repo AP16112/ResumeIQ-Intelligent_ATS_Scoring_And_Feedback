@@ -21,15 +21,19 @@ import magic    # it is used to check the type of file like whether the uploaded
 # Actual pdf files internally in backend starts with %pdf sign
 
 # Explicitly load libmagic from system path
-def init_magic():
+def get_magic():
+    """
+    Return a Magic object that is bound to the system libmagic.
+    """
     libmagic_path = "/usr/lib/x86_64-linux-gnu/libmagic.so.1"
     if os.path.exists(libmagic_path):
-        magic._libraries = [ctypes.CDLL(libmagic_path)]
+        return magic.Magic(mime=True, magic_file=libmagic_path)
     else:
         raise RuntimeError("libmagic shared library not found")
 
-# Call once at startup
-init_magic()
+
+# Create a global Magic instance
+magic_instance = get_magic()
 
 from typing import Tuple, Optional
 # here we are importing these Tuple, Optional from the typing module to use them in our code for type hinting. This way we can easily identify the types of the variables and also we can easily debug our application by looking at the type hints in our code. This way we can keep our code organized and modular by using type hints in our code. We will write all the logging related code in this file only, so that we can keep our code organized and modular.
@@ -118,7 +122,8 @@ def validate_file(file_data: bytes, filename: str) -> Tuple[bool, str, Optional[
     try:
         # Uses magic to inspect the raw file bytes (file_data) and determine the MIME type (e.g., "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document").
         # This is more reliable than just checking the file extension.
-        mime_type = magic.from_buffer(file_data, mime=True)
+        # mime_type = magic.from_buffer(file_data, mime=True)
+        mime_type = magic_instance.from_buffer(file_data)
         log_info(f'Detected MIME type {mime_type} for file {filename}', context='validate_file')
     except Exception as e:
         log_error(e, context='validate_file')
