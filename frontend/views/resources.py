@@ -77,5 +77,3 @@ def render():
         - Brand identity
         - Visual communication
         """)
-    
-    st.markdown("---")
