@@ -9,6 +9,20 @@ WORKDIR /app
 # Defines the working directory inside the container. All subsequent commands run inside /app.
 
 
+# Install system dependencies (libmagic for python-magic + WeasyPrint deps)
+RUN apt-get update && apt-get install -y \
+    libmagic1 \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-xlib-2.0-0 \
+    libffi-dev \
+    libgobject-2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+
+
 # Copies everything from your local project folder into /app inside the container. This includes requirements.txt, your backend/ code, etc.
 # Copy project files into the container
 COPY . .
@@ -18,6 +32,10 @@ COPY . .
 # --no-cache-dir prevents pip from storing temporary files → keeps the image smaller.
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Install spaCy models
+RUN python -m spacy download en_core_web_md && \
+    python -m spacy download en_core_web_sm
 
 # Declares that the container will listen on port 7860.
 # Hugging Face Spaces always uses port 7860
