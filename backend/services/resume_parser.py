@@ -13,8 +13,18 @@
 
 import io
 import logging
+
+
+import os
+import ctypes
 import magic    # it is used to check the type of file like whether the uploaded pdf file is actually pdf or not
 # Actual pdf files internally in backend starts with %pdf sign
+
+# Explicitly load libmagic from system path
+libmagic_path = "/usr/lib/x86_64-linux-gnu/libmagic.so.1"
+if os.path.exists(libmagic_path):
+    magic._libraries = [ctypes.CDLL(libmagic_path)]
+    
 
 from typing import Tuple, Optional
 # here we are importing these Tuple, Optional from the typing module to use them in our code for type hinting. This way we can easily identify the types of the variables and also we can easily debug our application by looking at the type hints in our code. This way we can keep our code organized and modular by using type hints in our code. We will write all the logging related code in this file only, so that we can keep our code organized and modular.
