@@ -15,25 +15,25 @@ import io
 import logging
 
 
-import os
-import ctypes
+import glob
 import magic    # it is used to check the type of file like whether the uploaded pdf file is actually pdf or not
 # Actual pdf files internally in backend starts with %pdf sign
 
 # Explicitly load libmagic from system path
 def get_magic():
     """
-    Return a Magic object that is bound to the system libmagic.
+    Auto-detect libmagic shared library and return a Magic instance.
+    Works across local and Streamlit Cloud environments.
     """
-    libmagic_path = "/usr/lib/x86_64-linux-gnu/libmagic.so.1"
-    if os.path.exists(libmagic_path):
-        return magic.Magic(mime=True, magic_file=libmagic_path)
-    else:
+    candidates = glob.glob("/usr/lib/**/libmagic.so*", recursive=True)
+    if not candidates:
         raise RuntimeError("libmagic shared library not found")
+    return magic.Magic(mime=True, magic_file=candidates[0])
 
-
-# Create a global Magic instance
+# Global instance
 magic_instance = get_magic()
+
+
 
 from typing import Tuple, Optional
 # here we are importing these Tuple, Optional from the typing module to use them in our code for type hinting. This way we can easily identify the types of the variables and also we can easily debug our application by looking at the type hints in our code. This way we can keep our code organized and modular by using type hints in our code. We will write all the logging related code in this file only, so that we can keep our code organized and modular.
