@@ -1,0 +1,4 @@
+
+# It is required for making python-magic work correctly.
+
+libmagic1
